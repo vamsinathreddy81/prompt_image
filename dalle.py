@@ -1,4 +1,29 @@
+import os
+import openai
+import webbrowser
 
+
+
+# Get the OpenAI API key from the .env file
+api_key = "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"
+
+if not api_key:
+    raise ValueError("Api key not found in .env file")
+
+openai.api_key = api_key
+
+user_prompt = input("Write A Prompt to Generate Image: ")
+
+response = openai.Image.create(
+    prompt=user_prompt,
+    n=1,
+    size="1024x1024"
+)
+
+image_url = response['data'][0]['url']
+
+# create an HTML template with the image
+html_template = f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,8 +32,22 @@
     <title>Image Display</title>
 </head>
 <body>
-    <img src="image.jpg" alt="">
     <h1>Generated Image - ByteWebster</h1>
-    <img src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-eL2eV3Ba1h55FFo7FxmKFnt9/user-DvETVElZYt18QGdf21veW0It/img-jEsfHu7PcPXNNhMu8TpFFBsD.png?st=2023-10-21T15%3A53%3A41Z&se=2023-10-21T17%3A53%3A41Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-10-20T23%3A55%3A27Z&ske=2023-10-21T23%3A55%3A27Z&sks=b&skv=2021-08-06&sig=MGUlJWd3q%2BwGHAndFSehI0Whem/nus2gUtvT7314YJs%3D" alt="Generated Image" width="500">
+    <img src="{image_url}" alt="Generated Image" width="500">
 </body>
 </html>
+"""
+
+output_folder = "dalle-images"
+os.makedirs(output_folder, exist_ok=True)
+
+# Define the file path for the HTML File
+file_path = os.path.join(output_folder, "image_display.html")
+
+with open(file_path, "w") as file:
+    file.write(html_template)
+    
+print(f"Image URL: {image_url}")
+print(f"HTML template saved to '{file_path}'")
+
+webbrowser.open(file_path)
